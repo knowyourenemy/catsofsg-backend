@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.get("/api", (req: express.Request, res: express.Response) => {
   console.log("yeah it ran");
-  res.send("<h2>Hi There</h2>");
+  res.send("<h2>Cats of SG</h2>");
 });
 
 app.use("/api/cats", catsRouter);
