@@ -26,6 +26,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up node
+        uses: actions/setup-node@v1
+        with:
+          version: 14
+
       - name: Build repository
         run: npm run build
 
