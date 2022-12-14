@@ -20,9 +20,9 @@ export const connectToDatabase = async () => {
   dbConnection = db;
 };
 
-export const getDbConnection = async () => {
-  if (!dbConnection) {
-    await connectToDatabase();
-  }
+export const getDbConnection = () => {
+  // if (!dbConnection) {
+  //   await connectToDatabase();
+  // }
   return dbConnection;
 };

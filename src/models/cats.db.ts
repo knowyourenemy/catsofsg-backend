@@ -6,10 +6,8 @@ interface CatInterface {
   colour: string;
 }
 
-export const getCatsCollection = async (): Promise<
-  Collection<CatInterface>
-> => {
-  const db = await getDbConnection();
+export const getCatsCollection = (): Collection<CatInterface> => {
+  const db = getDbConnection();
   return db.collection<CatInterface>(
     process.env.CATS_COLLECTION_NAME || "cat_collection"
   );

@@ -11,7 +11,7 @@ router.get(
     next: express.NextFunction
   ) => {
     console.log("GET CATS ROUTE!");
-    const catsCollection = await getCatsCollection();
+    const catsCollection = getCatsCollection();
     const data = await getAllCats(catsCollection);
     res.send(data);
   }
