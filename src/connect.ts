@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 let dbConnection: Db;
 
 export const connectToDatabase = async () => {
-  dotenv.config();
+  // dotenv.config();
 
-  console.log(process.env.DB_CONN_STRING || "connection_string");
+  // console.log(process.env.DB_CONN_STRING || "connection_string");
   const client: MongoClient = new MongoClient(
     process.env.DB_CONN_STRING || "connection_string"
   );
@@ -20,4 +20,9 @@ export const connectToDatabase = async () => {
   dbConnection = db;
 };
 
-export const getDbConnection = () => dbConnection;
+export const getDbConnection = async () => {
+  if (!dbConnection) {
+    await connectToDatabase();
+  }
+  return dbConnection;
+};
