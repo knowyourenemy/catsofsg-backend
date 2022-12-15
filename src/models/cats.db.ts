@@ -1,9 +1,12 @@
 import { Db, Collection } from "mongodb";
 import { getDbConnection } from "../connect";
 
-interface CatInterface {
+export interface CatInterface {
   name: string;
   colour: string;
+  imageUrl: string;
+  imageName: string;
+  catId: string;
 }
 
 export const getCatsCollection = (): Collection<CatInterface> => {
@@ -18,4 +21,12 @@ export const getAllCats = async (
 ): Promise<CatInterface[]> => {
   const res = await catCollection.find().toArray();
   return res;
+};
+
+export const insertCat = async (
+  catCollection: Collection<CatInterface>,
+  catData: CatInterface
+): Promise<boolean> => {
+  const res = await catCollection.insertOne(catData);
+  return res.acknowledged;
 };
