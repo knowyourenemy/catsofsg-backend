@@ -1,4 +1,5 @@
 import { File } from "@google-cloud/storage";
+import { CatError, HelperError } from "../../util/errorHandler";
 
 const SIGNED_URL_DURATION = 15 * 60 * 1000;
 
@@ -8,13 +9,21 @@ const SIGNED_URL_DURATION = 15 * 60 * 1000;
  * @returns {string} - Newly generated Signed URL.
  */
 export const getSignedUrl = async (file: File): Promise<string> => {
-  const [signedUrl] = await file.getSignedUrl({
-    version: "v4",
-    action: "read",
-    expires: Date.now() + SIGNED_URL_DURATION,
-  });
+  try {
+    const [signedUrl] = await file.getSignedUrl({
+      version: "v4",
+      action: "read",
+      expires: Date.now() + SIGNED_URL_DURATION,
+    });
 
-  return signedUrl;
+    return signedUrl;
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new HelperError(e.message);
+    }
+  }
 };
 
 /**
@@ -24,32 +33,40 @@ export const getSignedUrl = async (file: File): Promise<string> => {
  * @returns {boolean} - Returns true if URL has expired and false otherwise.
  */
 export const checkUrlExpired = (url: string, offset: number): boolean => {
-  const urlParams = url.split("&");
+  try {
+    const urlParams = url.split("&");
 
-  const urlCreatedISO = urlParams
-    .find((param) => param.startsWith("X-Goog-Date"))
-    ?.replace("X-Goog-Date=", "");
-  const urlDuration = urlParams
-    .find((param) => param.startsWith("X-Goog-Expires"))
-    ?.replace("X-Goog-Expires=", "");
+    const urlCreatedISO = urlParams
+      .find((param) => param.startsWith("X-Goog-Date"))
+      ?.replace("X-Goog-Date=", "");
+    const urlDuration = urlParams
+      .find((param) => param.startsWith("X-Goog-Expires"))
+      ?.replace("X-Goog-Expires=", "");
 
-  if (!urlCreatedISO || !urlDuration) {
-    throw new Error("somethign went wrong with url");
+    if (!urlCreatedISO || !urlDuration) {
+      throw new HelperError("Signed URL format error.");
+    }
+    const reformattedISO = `${urlCreatedISO.substring(
+      0,
+      4
+    )}-${urlCreatedISO.substring(4, 6)}-${urlCreatedISO.substring(
+      6,
+      8
+    )}T${urlCreatedISO.substring(9, 11)}:${urlCreatedISO.substring(
+      11,
+      13
+    )}:${urlCreatedISO.substring(13)}`;
+
+    const urlCreatedDate = new Date(reformattedISO);
+    const urlAdjustedExpiryDate = urlCreatedDate.setSeconds(
+      urlCreatedDate.getSeconds() + Number(urlDuration) - offset
+    );
+    return urlAdjustedExpiryDate <= Date.now();
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new HelperError(e.message);
+    }
   }
-  const reformattedISO = `${urlCreatedISO.substring(
-    0,
-    4
-  )}-${urlCreatedISO.substring(4, 6)}-${urlCreatedISO.substring(
-    6,
-    8
-  )}T${urlCreatedISO.substring(9, 11)}:${urlCreatedISO.substring(
-    11,
-    13
-  )}:${urlCreatedISO.substring(13)}`;
-
-  const urlCreatedDate = new Date(reformattedISO);
-  const urlAdjustedExpiryDate = urlCreatedDate.setSeconds(
-    urlCreatedDate.getSeconds() + Number(urlDuration) - offset
-  );
-  return urlAdjustedExpiryDate <= Date.now();
 };

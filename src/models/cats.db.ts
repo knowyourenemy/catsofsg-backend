@@ -1,5 +1,5 @@
-import { Db, Collection } from "mongodb";
 import { getCatsCollection } from "../db";
+import { DbError, NotFoundError, CatError } from "../util/errorHandler";
 
 export interface CatInterface {
   name: string;
@@ -14,9 +14,17 @@ export interface CatInterface {
  * @returns {CatInterface[]} Array of cat documents.
  */
 export const getAllCats = async (): Promise<CatInterface[]> => {
-  const catsCollection = getCatsCollection();
-  const res = await catsCollection.find().toArray();
-  return res;
+  try {
+    const catsCollection = getCatsCollection();
+    const res = await catsCollection.find().toArray();
+    return res;
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new DbError(e.message);
+    }
+  }
 };
 
 /**
@@ -25,40 +33,65 @@ export const getAllCats = async (): Promise<CatInterface[]> => {
  * @returns {CatInterface} Cat document.
  */
 export const getSingleCat = async (catId: string): Promise<CatInterface> => {
-  const catsCollection = getCatsCollection();
-  const res = await catsCollection.findOne({ catId });
-  if (!res) {
-    throw new Error("could not find cat");
+  try {
+    const catsCollection = getCatsCollection();
+    const res = await catsCollection.findOne({ catId });
+    if (!res) {
+      throw new NotFoundError(`Could not find cat with ID ${catId}.`);
+    }
+    return res;
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new DbError(e.message);
+    }
   }
-  return res;
 };
 
 /**
  * Insert cat into DB and GCP bucket.
- * @param catId - ID of cat.
- * @returns {boolean} Returns true if insertion was successful.
+ * @param catData - Cat document.
+ * @returns {void}
  */
-export const insertCat = async (catData: CatInterface): Promise<boolean> => {
-  const catsCollection = getCatsCollection();
-  const res = await catsCollection.insertOne(catData);
-  return res.acknowledged;
+export const insertCat = async (catData: CatInterface): Promise<void> => {
+  try {
+    const catsCollection = getCatsCollection();
+    const res = await catsCollection.insertOne(catData);
+    if (!res.acknowledged) {
+      throw new DbError(`Could not insert cat with ID ${catData.catId}.`);
+    }
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new DbError(e.message);
+    }
+  }
 };
 
 /**
  * Update imageUrl of single cat.
  * @param catId - ID of cat.
- * @returns {boolean} Returns true if update was successful.
+ * @returns {void}
  */
 export const updateImageUrl = async (catId: string, newUrl: string) => {
-  const catsCollection = getCatsCollection();
-  const res = await catsCollection.findOneAndUpdate(
-    { catId },
-    {
-      $set: { imageUrl: newUrl },
+  try {
+    const catsCollection = getCatsCollection();
+    const res = await catsCollection.findOneAndUpdate(
+      { catId },
+      {
+        $set: { imageUrl: newUrl },
+      }
+    );
+    if (!res.ok) {
+      throw new DbError(`Could not update image URL for cat with ID ${catId}.`);
     }
-  );
-  if (res.ok) {
-    return true;
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new DbError(e.message);
+    }
   }
-  return false;
 };
