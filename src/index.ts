@@ -1,9 +1,13 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
-const multer = require("multer");
 import catsRouter from "./routes/cats";
 import { connectToDatabase } from "./db";
-import { Multer } from "multer";
+import { CatError } from "./util/errorHandler";
+import { MulterError } from "multer";
+
+dotenv.config({
+  path: `.env.${process.env.NODE_ENV}`,
+});
 
 const serveApp = async () => {
   const app = express();
@@ -18,13 +22,20 @@ const serveApp = async () => {
 
   app.use("/api/cats", catsRouter);
 
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
+    if (err instanceof MulterError) {
+      return res.status(400).send(err.message);
+    } else if (err instanceof CatError) {
+      return res.status(err.statusCode).send(err.message);
+    } else {
+      return res.sendStatus(500);
+    }
+  });
+
   const port = process.env.PORT || 3000;
 
-  app.listen(port, () => console.log(`listening on port ${port}`));
+  app.listen(port, () => console.log(`listening on port ${port}.`));
 };
-
-dotenv.config({
-  path: `.env.${process.env.NODE_ENV}`,
-});
 
 serveApp();

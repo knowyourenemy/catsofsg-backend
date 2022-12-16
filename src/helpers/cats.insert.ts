@@ -1,5 +1,6 @@
 // import { File } from "@google-cloud/storage";
 import { CatInterface, insertCat } from "../models/cats.db";
+import { CatError, HelperError } from "../util/errorHandler";
 import catsBucket from "./gcp/gcp.config";
 import { getSignedUrl } from "./gcp/gcp.url";
 
@@ -11,25 +12,33 @@ import { getSignedUrl } from "./gcp/gcp.url";
 const uploadImage = (
   file: Express.Multer.File,
   fileName: string
-): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const { originalname, buffer } = file;
+): Promise<string> => {
+  try {
+    return new Promise<string>((resolve, reject) => {
+      const { originalname, buffer } = file;
 
-    const blob = catsBucket.file(fileName);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
+      const blob = catsBucket.file(fileName);
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+      });
+      blobStream
+        .on("finish", async () => {
+          const signedUrl = await getSignedUrl(blob);
+          resolve(signedUrl);
+        })
+        .on("error", (e) => {
+          reject(new HelperError("Could not upload image to bucket."));
+        })
+        .end(buffer);
     });
-    blobStream
-      .on("finish", async () => {
-        const signedUrl = await getSignedUrl(blob);
-        resolve(signedUrl);
-      })
-      .on("error", (e) => {
-        console.log(e);
-        reject(`Unable to upload image, something went wrong`);
-      })
-      .end(buffer);
-  });
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new HelperError(e.message);
+    }
+  }
+};
 
 /**
  * Insert cat document into DB and upload file to GCP Bucket.
@@ -41,15 +50,23 @@ export const insertCatAndUploadImage = async (
   catData: Omit<CatInterface, "imageUrl" | "imageName">,
   imageFile: Express.Multer.File
 ): Promise<string> => {
-  const newname = `${catData.catId}/${imageFile.originalname}`.replace(
-    / /g,
-    "_"
-  );
-  const url = await uploadImage(imageFile, newname);
-  const res = await insertCat({
-    ...catData,
-    imageUrl: url,
-    imageName: newname,
-  });
-  return url;
+  try {
+    const newname = `${catData.catId}/${imageFile.originalname}`.replace(
+      / /g,
+      "_"
+    );
+    const url = await uploadImage(imageFile, newname);
+    const res = await insertCat({
+      ...catData,
+      imageUrl: url,
+      imageName: newname,
+    });
+    return url;
+  } catch (e: any) {
+    if (e instanceof CatError) {
+      throw e;
+    } else {
+      throw new HelperError(e.message);
+    }
+  }
 };
