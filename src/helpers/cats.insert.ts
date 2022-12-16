@@ -21,9 +21,7 @@ const uploadImage = (
     });
     blobStream
       .on("finish", async () => {
-        console.log("this finished");
         const signedUrl = await getSignedUrl(blob);
-
         resolve(signedUrl);
       })
       .on("error", (e) => {

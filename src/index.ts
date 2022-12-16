@@ -13,7 +13,6 @@ const serveApp = async () => {
   app.use(express.json());
 
   app.get("/api", (req: express.Request, res: express.Response) => {
-    console.log("yeah it ran");
     res.send("<h2>Cats of SG</h2>");
   });
 

@@ -4,10 +4,12 @@ import { getCatWithImageUrl } from "../helpers/cats.get";
 import { insertCatAndUploadImage } from "../helpers/cats.insert";
 import { getAllCats } from "../models/cats.db";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 const multerMid: Multer = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: MAX_FILE_SIZE,
   },
 });
 
