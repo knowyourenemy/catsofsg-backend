@@ -1,50 +1,50 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
+import multer, { Multer } from "multer";
 import { getCatWithImageUrl } from "../helpers/cats.get";
 import { insertCatAndUploadImage } from "../helpers/cats.insert";
 import { getAllCats } from "../models/cats.db";
 
+const multerMid: Multer = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
 const router = express.Router();
 
 router
-  .route("/")
-  .get(
-    async (
-      req: express.Request,
-      res: express.Response,
-      next: express.NextFunction
-    ) => {
-      const data = await getAllCats();
-      res.send(data);
-    }
-  )
-  .post(async (req: any, res: express.Response, next: express.NextFunction) => {
-    console.log(req.body);
-    console.log(req.file);
-    const url = await insertCatAndUploadImage(
-      {
-        name: req.body.name,
-        catId: req.body.catId,
-        colour: req.body.colour,
-      },
-      req.file
-    );
+  .get("/", async (req: Request, res: Response, next: NextFunction) => {
+    const data = await getAllCats();
+    res.send(data);
+  })
+  .post(
+    "/",
+    multerMid.single("file"),
+    async (req: Request, res: Response, next: NextFunction) => {
+      if (!req.file) {
+        throw new Error("missing file");
+      }
+      const url = await insertCatAndUploadImage(
+        {
+          name: req.body.name,
+          catId: req.body.catId,
+          colour: req.body.colour,
+        },
+        req.file
+      );
 
-    return res.send({
-      imageUrl: url,
-    });
-  });
+      return res.send({
+        imageUrl: url,
+      });
+    }
+  );
 
 router
   .route("/:catId")
-  .get(
-    async (
-      req: express.Request,
-      res: express.Response,
-      next: express.NextFunction
-    ) => {
-      const data = await getCatWithImageUrl(req.params.catId);
-      res.send(data);
-    }
-  );
+  .get(async (req: Request, res: Response, next: NextFunction) => {
+    const data = await getCatWithImageUrl(req.params.catId);
+    res.send(data);
+  });
 
 export default router;
