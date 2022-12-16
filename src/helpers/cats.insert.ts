@@ -1,16 +1,17 @@
-import { CatInterface, getCatsCollection, insertCat } from "../models/cats.db";
+// import { File } from "@google-cloud/storage";
+import { CatInterface, insertCat } from "../models/cats.db";
 import catsBucket from "./gcp/gcp.config";
+import { getSignedUrl } from "./gcp/gcp.url";
 
 /**
- *
- * @param { File } object file object that will be uploaded
- * @description - This function does the following
- * - It uploads a file to the image bucket on Google Cloud
- * - It accepts an object as an argument with the
- *   "originalname" and "buffer" as keys
+ * Upload file to GCP bucket.
+ * @param {Express.Multer.File} file - file to be uploaded.
+ * @returns {string} signed URL to access file.
  */
-
-const uploadImage = (file: any, fileName: string): Promise<string> =>
+const uploadImage = (
+  file: Express.Multer.File,
+  fileName: string
+): Promise<string> =>
   new Promise((resolve, reject) => {
     const { originalname, buffer } = file;
 
@@ -21,11 +22,7 @@ const uploadImage = (file: any, fileName: string): Promise<string> =>
     blobStream
       .on("finish", async () => {
         console.log("this finished");
-        const [signedUrl] = await blob.getSignedUrl({
-          version: "v4",
-          action: "read",
-          expires: Date.now() + 15 * 60 * 1000, // 15 minutes
-        });
+        const signedUrl = await getSignedUrl(blob);
 
         resolve(signedUrl);
       })
@@ -36,17 +33,22 @@ const uploadImage = (file: any, fileName: string): Promise<string> =>
       .end(buffer);
   });
 
+/**
+ * Insert cat document into DB and upload file to GCP Bucket.
+ * @param {Omit<CatInterface, "imageUrl" | "imageName">} catData - Cat document.
+ * @param {Express.Multer.File} imageFile - Image to be uploaded.
+ * @returns {string} URL to access image.
+ */
 export const insertCatAndUploadImage = async (
   catData: Omit<CatInterface, "imageUrl" | "imageName">,
-  imageFile: any
+  imageFile: Express.Multer.File
 ): Promise<string> => {
   const newname = `${catData.catId}/${imageFile.originalname}`.replace(
     / /g,
     "_"
   );
   const url = await uploadImage(imageFile, newname);
-  const catCollection = getCatsCollection();
-  const res = await insertCat(catCollection, {
+  const res = await insertCat({
     ...catData,
     imageUrl: url,
     imageName: newname,

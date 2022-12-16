@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { Storage } from "@google-cloud/storage";
+import { Bucket, Storage } from "@google-cloud/storage";
 import path from "path";
 
 dotenv.config({
@@ -8,7 +8,7 @@ dotenv.config({
 
 const serviceKey = path.join(__dirname, "./keys.json");
 
-let storage;
+let storage: Storage;
 
 if (process.env.NODE_ENV == "development") {
   storage = new Storage({
@@ -19,6 +19,8 @@ if (process.env.NODE_ENV == "development") {
   storage = new Storage();
 }
 
-const catsBucket = storage.bucket(process.env.GCP_BUCKET_NAME || "bucket-name");
+const catsBucket: Bucket = storage.bucket(
+  process.env.GCP_BUCKET_NAME || "bucket-name"
+);
 
 export default catsBucket;

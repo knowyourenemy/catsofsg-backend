@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 const multer = require("multer");
 import catsRouter from "./routes/cats";
-import { connectToDatabase } from "./connect";
+import { connectToDatabase } from "./db";
 
 const serveApp = async () => {
   const app = express();

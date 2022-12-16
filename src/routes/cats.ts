@@ -1,6 +1,7 @@
 import express from "express";
+import { getCatWithImageUrl } from "../helpers/cats.get";
 import { insertCatAndUploadImage } from "../helpers/cats.insert";
-import { getAllCats, getCatsCollection, insertCat } from "../models/cats.db";
+import { getAllCats } from "../models/cats.db";
 
 const router = express.Router();
 
@@ -12,9 +13,7 @@ router
       res: express.Response,
       next: express.NextFunction
     ) => {
-      console.log("GET CATS ROUTE!");
-      const catsCollection = getCatsCollection();
-      const data = await getAllCats(catsCollection);
+      const data = await getAllCats();
       res.send(data);
     }
   )
@@ -34,5 +33,18 @@ router
       imageUrl: url,
     });
   });
+
+router
+  .route("/:catId")
+  .get(
+    async (
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction
+    ) => {
+      const data = await getCatWithImageUrl(req.params.catId);
+      res.send(data);
+    }
+  );
 
 export default router;

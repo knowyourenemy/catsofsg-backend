@@ -1,12 +1,11 @@
 import { MongoClient, Db, Collection } from "mongodb";
 import dotenv from "dotenv";
+import { CatInterface } from "./models/cats.db";
 
 let dbConnection: Db;
+let catsCollection: Collection<CatInterface>;
 
 export const connectToDatabase = async () => {
-  // dotenv.config();
-
-  // console.log(process.env.DB_CONN_STRING || "connection_string");
   const client: MongoClient = new MongoClient(
     process.env.DB_CONN_STRING || "connection_string"
   );
@@ -18,11 +17,9 @@ export const connectToDatabase = async () => {
   console.log(`Successfully connected to database: ${db.databaseName}`);
 
   dbConnection = db;
+  catsCollection = db.collection(
+    process.env.CATS_COLLECTION_NAME || "cat_collection"
+  );
 };
 
-export const getDbConnection = () => {
-  // if (!dbConnection) {
-  //   await connectToDatabase();
-  // }
-  return dbConnection;
-};
+export const getCatsCollection = (): Collection<CatInterface> => catsCollection;
