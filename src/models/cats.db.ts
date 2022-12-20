@@ -3,20 +3,44 @@ import { DbError, NotFoundError, CatError } from "../util/errorHandler";
 
 export interface CatInterface {
   name: string;
-  colour: string;
+  description: string;
   imageUrl: string;
   imageName: string;
   catId: string;
+  location: {
+    lng: number;
+    lat: number;
+  };
+  area: string;
+}
+
+export interface CatPreviewInterface {
+  catId: string;
+  location: {
+    lng: number;
+    lat: number;
+  };
 }
 
 /**
  * Get all cat documents.
  * @returns {CatInterface[]} Array of cat documents.
  */
-export const getAllCats = async (): Promise<CatInterface[]> => {
+export const getAllCats = async (): Promise<CatPreviewInterface[]> => {
   try {
     const catsCollection = getCatsCollection();
-    const res = await catsCollection.find().toArray();
+    const res = await catsCollection
+      .find(
+        {},
+        {
+          projection: {
+            _id: 0,
+            catId: 1,
+            location: 1,
+          },
+        }
+      )
+      .toArray();
     return res;
   } catch (e: any) {
     if (e instanceof CatError) {
@@ -35,7 +59,14 @@ export const getAllCats = async (): Promise<CatInterface[]> => {
 export const getSingleCat = async (catId: string): Promise<CatInterface> => {
   try {
     const catsCollection = getCatsCollection();
-    const res = await catsCollection.findOne({ catId });
+    const res = await catsCollection.findOne(
+      { catId },
+      {
+        projection: {
+          _id: 0,
+        },
+      }
+    );
     if (!res) {
       throw new NotFoundError(`Could not find cat with ID ${catId}.`);
     }
