@@ -38,7 +38,10 @@ router
           !req.file ||
           !req.body.name ||
           !req.body.catId ||
-          !req.body.colour
+          !req.body.description ||
+          !req.body.lng ||
+          !req.body.lat ||
+          !req.body.area
         ) {
           throw new BadRequestError(
             "Incomplete information to process request."
@@ -48,7 +51,12 @@ router
           {
             name: req.body.name,
             catId: req.body.catId,
-            colour: req.body.colour,
+            description: req.body.description,
+            location: {
+              lat: parseFloat(req.body.lat),
+              lng: parseFloat(req.body.lng),
+            },
+            area: req.body.area,
           },
           req.file
         );

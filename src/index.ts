@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+var cors = require("cors");
 import dotenv from "dotenv";
 import catsRouter from "./routes/cats";
 import { connectToDatabase } from "./db";
@@ -15,6 +16,8 @@ const serveApp = async () => {
   await connectToDatabase();
 
   app.use(express.json());
+
+  app.use(cors());
 
   app.get("/api", (req: express.Request, res: express.Response) => {
     res.send("<h2>Cats of SG</h2>");
