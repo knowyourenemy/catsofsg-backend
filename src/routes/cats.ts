@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import multer, { Multer, MulterError } from "multer";
 import { getCatWithImageUrl } from "../helpers/cats.get";
 import { insertCatAndUploadImage } from "../helpers/cats.insert";
+import { reCaptcha } from "../middleware/recaptcha";
 import { getAllCats } from "../models/cats.db";
 import { BadRequestError, CatError, RouteError } from "../util/errorHandler";
 
@@ -32,6 +33,7 @@ router
   .post(
     "/",
     multerMid.single("file"),
+    reCaptcha,
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (
@@ -41,7 +43,8 @@ router
           !req.body.description ||
           !req.body.lng ||
           !req.body.lat ||
-          !req.body.area
+          !req.body.area ||
+          !req.body.recaptcha
         ) {
           throw new BadRequestError(
             "Incomplete information to process request."
