@@ -48,7 +48,6 @@ router
           !req.body.dateCreated.trim() ||
           !req.body.dateModified.trim()
         ) {
-          console.log(req.body);
           throw new BadRequestError(
             "Incomplete information to process request."
           );
