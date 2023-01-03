@@ -43,8 +43,8 @@ router
           !req.body.sex.trim() ||
           !req.body.lng.trim() ||
           !req.body.lat.trim() ||
-          !req.body.area.trim() ||
-          !req.body.recaptcha.trim() ||
+          !req.body.community.trim() ||
+          !req.body.captcha.trim() ||
           !req.body.dateCreated.trim() ||
           !req.body.dateModified.trim()
         ) {
@@ -55,23 +55,23 @@ router
         }
         const url = await insertCatAndUploadImage(
           {
-            name: req.body.name.trim(),
-            catId: req.body.catId.trim(),
-            sex: req.body.sex.trim(),
-            personality: req.body.personality.trim(),
-            likes: req.body.likes.trim(),
-            dislikes: req.body.dislikes.trim(),
-            dateCreated: parseInt(req.body.dateCreated.trim()),
-            dateModified: parseInt(req.body.dateModified.trim()),
-            location: {
-              lat: parseFloat(req.body.lat.trim()),
-              lng: parseFloat(req.body.lng.trim()),
+            name: req.body.name?.trim(),
+            catId: req.body.catId?.trim(),
+            sex: req.body.sex?.trim(),
+            personality: req.body.personality?.trim(),
+            likes: req.body.likes?.trim(),
+            dislikes: req.body.dislikes?.trim(),
+            other: req.body.other?.trim(),
+            dateCreated: parseInt(req.body.dateCreated?.trim()),
+            dateModified: parseInt(req.body.dateModified?.trim()),
+            position: {
+              lat: parseFloat(req.body.lat?.trim()),
+              lng: parseFloat(req.body.lng?.trim()),
             },
-            area: req.body.area.trim(),
+            community: req.body.community?.trim(),
           },
           req.file
         );
-
         return res.send({
           imageUrl: url,
         });
@@ -90,7 +90,7 @@ router
   .get(async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = await getCatWithImageUrl(req.params.catId);
-      res.send(data);
+      return res.send(data);
     } catch (e: any) {
       if (e instanceof CatError) {
         next(e);

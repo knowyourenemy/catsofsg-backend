@@ -7,11 +7,11 @@ export interface CatInterface {
   imageUrl: string;
   imageName: string;
   catId: string;
-  location: {
+  position: {
     lng: number;
     lat: number;
   };
-  area: string;
+  community: string;
   likes?: string;
   dislikes?: string;
   personality?: string;
@@ -22,11 +22,12 @@ export interface CatInterface {
 
 export interface CatPreviewInterface {
   catId: string;
-  location: {
+  position: {
     lng: number;
     lat: number;
   };
-  area: string;
+  community: string;
+  name: string;
 }
 
 /**
@@ -43,8 +44,9 @@ export const getAllCats = async (): Promise<CatPreviewInterface[]> => {
           projection: {
             _id: 0,
             catId: 1,
-            location: 1,
-            area: 1,
+            position: 1,
+            community: 1,
+            name: 1,
           },
         }
       )

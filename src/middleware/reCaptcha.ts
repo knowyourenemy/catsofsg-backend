@@ -22,13 +22,13 @@ export const reCaptcha = async (
   next: NextFunction
 ) => {
   try {
-    if (!req.body.recaptcha) {
+    if (!req.body.captcha) {
       throw new BadRequestError("Missing ReCaptcha token");
     }
 
     axios
       .post(
-        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.recaptcha}`
+        `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${req.body.captcha}`
       )
       .then((res) => {
         if (res.status == 200) {
