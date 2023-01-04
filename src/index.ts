@@ -17,11 +17,15 @@ const serveApp = async () => {
 
   app.use(express.json());
 
-  app.use(
-    cors({
-      origin: ["https://www.catsofsg.com", "https://catsofsg.com"],
-    })
-  );
+  if (process.env.NODE_ENV == "production") {
+    app.use(
+      cors({
+        origin: ["https://www.catsofsg.com", "https://catsofsg.com"],
+      })
+    );
+  } else {
+    app.use(cors());
+  }
 
   app.get("/api", (req: express.Request, res: express.Response) => {
     res.send("<h2>Cats of SG</h2>");
