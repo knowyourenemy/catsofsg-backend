@@ -17,7 +17,11 @@ const serveApp = async () => {
 
   app.use(express.json());
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: "https://www.catsofsg.com",
+    })
+  );
 
   app.get("/api", (req: express.Request, res: express.Response) => {
     res.send("<h2>Cats of SG</h2>");
