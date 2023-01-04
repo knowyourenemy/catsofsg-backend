@@ -3,23 +3,31 @@ import { DbError, NotFoundError, CatError } from "../util/errorHandler";
 
 export interface CatInterface {
   name: string;
-  description: string;
+  sex: string;
   imageUrl: string;
   imageName: string;
   catId: string;
-  location: {
+  position: {
     lng: number;
     lat: number;
   };
-  area: string;
+  community: string;
+  likes?: string;
+  dislikes?: string;
+  personality?: string;
+  other?: string;
+  dateCreated: number;
+  dateModified: number;
 }
 
 export interface CatPreviewInterface {
   catId: string;
-  location: {
+  position: {
     lng: number;
     lat: number;
   };
+  community: string;
+  name: string;
 }
 
 /**
@@ -36,7 +44,9 @@ export const getAllCats = async (): Promise<CatPreviewInterface[]> => {
           projection: {
             _id: 0,
             catId: 1,
-            location: 1,
+            position: 1,
+            community: 1,
+            name: 1,
           },
         }
       )
