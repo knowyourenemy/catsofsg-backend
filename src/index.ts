@@ -19,7 +19,7 @@ const serveApp = async () => {
 
   app.use(
     cors({
-      origin: "https://www.catsofsg.com",
+      origin: ["https://www.catsofsg.com", "https://catsofsg.com"],
     })
   );
 
