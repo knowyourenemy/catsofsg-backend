@@ -1,7 +1,7 @@
 import { File } from "@google-cloud/storage";
 import { CatError, HelperError } from "../../util/errorHandler";
 
-const SIGNED_URL_DURATION = 15 * 60 * 1000;
+const SIGNED_URL_DURATION = 24 * 60 * 60 * 1000;
 
 /**
  * Generate a signed URL for file in bucket.

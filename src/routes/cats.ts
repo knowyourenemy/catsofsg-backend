@@ -68,6 +68,7 @@ router
               lng: parseFloat(req.body.lng?.trim()),
             },
             community: req.body.community?.trim(),
+            approved: false,
           },
           req.file
         );
