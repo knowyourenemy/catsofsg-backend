@@ -18,6 +18,7 @@ export interface CatInterface {
   other?: string;
   dateCreated: number;
   dateModified: number;
+  approved: boolean;
 }
 
 export interface CatPreviewInterface {
@@ -39,7 +40,7 @@ export const getAllCats = async (): Promise<CatPreviewInterface[]> => {
     const catsCollection = getCatsCollection();
     const res = await catsCollection
       .find(
-        {},
+        { approved: true },
         {
           projection: {
             _id: 0,
@@ -70,10 +71,11 @@ export const getSingleCat = async (catId: string): Promise<CatInterface> => {
   try {
     const catsCollection = getCatsCollection();
     const res = await catsCollection.findOne(
-      { catId },
+      { catId, approved: true },
       {
         projection: {
           _id: 0,
+          approved: 0,
         },
       }
     );
